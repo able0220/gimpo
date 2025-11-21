@@ -1,131 +1,108 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>컬러 계산기</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teachable Machine 이미지 분류</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-
-    .calculator {
-      background-color: #fff;
-      border-radius: 10px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-      padding: 20px;
       text-align: center;
-    }
-
-    #display {
-      width: 100%;
-      height: 50px;
-      font-size: 2em;
-      text-align: right;
-      padding: 10px;
-      margin-bottom: 20px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-
-    .buttons {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-    }
-
-    /* 공통 버튼 스타일 */
-    .button {
-      font-size: 1.5em;
       padding: 20px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
+      background: #f7f7f7;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    #webcam-container {
+      margin-top: 20px;
+    }
+
+    button {
+      background: #4CAF50;
       color: white;
-      font-weight: bold;
-      transition: 0.2s;
+      padding: 12px 25px;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
     }
 
-    .button:active {
-      transform: scale(0.90);
+    button:hover {
+      background: #45a049;
     }
 
-    /* 숫자 버튼 색상 */
-    .num { background-color: #4CAF50; }       /* 녹색 */
-    .num2 { background-color: #2196F3; }      /* 파랑 */
-    .num3 { background-color: #9C27B0; }      /* 보라 */
-    .num4 { background-color: #FF9800; }      /* 주황 */
-
-    /* 기능 버튼 색 */
-    .clear { background-color: #f44336; }     /* 빨강 */
-    .equal { background-color: #009688; }     /* 청록 */
-    .op { background-color: #555; }           /* 회색 */
+    #label-container div {
+      font-size: 18px;
+      margin-top: 8px;
+      padding: 5px;
+    }
   </style>
 </head>
 <body>
-  <div class="calculator">
-    <input type="text" id="display" disabled>
-    <div class="buttons">
-      <!-- 색상 다른 숫자 버튼들 -->
-      <button class="button num" onclick="appendNumber(1)">1</button>
-      <button class="button num2" onclick="appendNumber(2)">2</button>
-      <button class="button num3" onclick="appendNumber(3)">3</button>
-      <button class="button num4" onclick="appendNumber(4)">4</button>
 
-      <button class="button num2" onclick="appendNumber(5)">5</button>
-      <button class="button num3" onclick="appendNumber(6)">6</button>
-      <button class="button num4" onclick="appendNumber(7)">7</button>
-      <button class="button num" onclick="appendNumber(8)">8</button>
+  <h1>📸 Teachable Machine Image Model</h1>
+  <p>Start 버튼을 누르면 웹캠이 실행되고, AI가 이미지를 분석합니다.</p>
 
-      <button class="button num3" onclick="appendNumber(9)">9</button>
-      <button class="button num4" onclick="appendNumber(0)">0</button>
+  <button type="button" onclick="init()">Start</button>
 
-      <!-- 기능 버튼 -->
-      <button class="button clear" onclick="clearDisplay()">C</button>
-      <button class="button equal" onclick="calculate()">=</button>
+  <div id="webcam-container"></div>
+  <div id="label-container"></div>
 
-      <!-- 연산자 버튼 -->
-      <button class="button op" onclick="appendOperator('+')">+</button>
-      <button class="button op" onclick="appendOperator('-')">-</button>
-      <button class="button op" onclick="appendOperator('*')">*</button>
-      <button class="button op" onclick="appendOperator('/')">/</button>
-    </div>
-  </div>
+  <!-- TensorFlow.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
 
-  <script>
-    let display = document.getElementById("display");
-    let currentInput = "";
+  <!-- Teachable Machine Image 라이브러리 -->
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 
-    function appendNumber(number) {
-      currentInput += number;
-      display.value = currentInput;
-    }
+  <script type="text/javascript">
+      const URL = "https://teachablemachine.withgoogle.com/models/ISowbmzv0/";
 
-    function appendOperator(operator) {
-      currentInput += operator;
-      display.value = currentInput;
-    }
+      let model, webcam, labelContainer, maxPredictions;
 
-    function clearDisplay() {
-      currentInput = "";
-      display.value = "";
-    }
+      async function init() {
+          const modelURL = URL + "model.json";
+          const metadataURL = URL + "metadata.json";
 
-    function calculate() {
-      try {
-        currentInput = eval(currentInput).toString();
-        display.value = currentInput;
-      } catch (e) {
-        display.value = "Error";
-        currentInput = "";
+          model = await tmImage.load(modelURL, metadataURL);
+          maxPredictions = model.getTotalClasses();
+
+          // 웹캠 설정
+          const flip = true;
+          webcam = new tmImage.Webcam(200, 200, flip);
+          await webcam.setup();
+          await webcam.play();
+          window.requestAnimationFrame(loop);
+
+          document.getElementById("webcam-container").appendChild(webcam.canvas);
+          labelContainer = document.getElementById("label-container");
+
+          for (let i = 0; i < maxPredictions; i++) {
+              labelContainer.appendChild(document.createElement("div"));
+          }
       }
-    }
+
+      async function loop() {
+          webcam.update();
+          await predict();
+          window.requestAnimationFrame(loop);
+      }
+
+      async function predict() {
+          const prediction = await model.predict(webcam.canvas);
+          for (let i = 0; i < maxPredictions; i++) {
+              const classPrediction =
+                  prediction[i].className +
+                  ": " +
+                  prediction[i].probability.toFixed(2);
+              labelContainer.childNodes[i].innerHTML = classPrediction;
+          }
+      }
   </script>
+
 </body>
 </html>
