@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>컬러 계산기</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .calculator {
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      text-align: center;
+    }
+
+    #display {
+      width: 100%;
+      height: 50px;
+      font-size: 2em;
+      text-align: right;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    /* 공통 버튼 스타일 */
+    .button {
+      font-size: 1.5em;
+      padding: 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      color: white;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+
+    .button:active {
+      transform: scale(0.90);
+    }
+
+    /* 숫자 버튼 색상 */
+    .num { background-color: #4CAF50; }       /* 녹색 */
+    .num2 { background-color: #2196F3; }      /* 파랑 */
+    .num3 { background-color: #9C27B0; }      /* 보라 */
+    .num4 { background-color: #FF9800; }      /* 주황 */
+
+    /* 기능 버튼 색 */
+    .clear { background-color: #f44336; }     /* 빨강 */
+    .equal { background-color: #009688; }     /* 청록 */
+    .op { background-color: #555; }           /* 회색 */
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <input type="text" id="display" disabled>
+    <div class="buttons">
+      <!-- 색상 다른 숫자 버튼들 -->
+      <button class="button num" onclick="appendNumber(1)">1</button>
+      <button class="button num2" onclick="appendNumber(2)">2</button>
+      <button class="button num3" onclick="appendNumber(3)">3</button>
+      <button class="button num4" onclick="appendNumber(4)">4</button>
+
+      <button class="button num2" onclick="appendNumber(5)">5</button>
+      <button class="button num3" onclick="appendNumber(6)">6</button>
+      <button class="button num4" onclick="appendNumber(7)">7</button>
+      <button class="button num" onclick="appendNumber(8)">8</button>
+
+      <button class="button num3" onclick="appendNumber(9)">9</button>
+      <button class="button num4" onclick="appendNumber(0)">0</button>
+
+      <!-- 기능 버튼 -->
+      <button class="button clear" onclick="clearDisplay()">C</button>
+      <button class="button equal" onclick="calculate()">=</button>
+
+      <!-- 연산자 버튼 -->
+      <button class="button op" onclick="appendOperator('+')">+</button>
+      <button class="button op" onclick="appendOperator('-')">-</button>
+      <button class="button op" onclick="appendOperator('*')">*</button>
+      <button class="button op" onclick="appendOperator('/')">/</button>
+    </div>
+  </div>
+
+  <script>
+    let display = document.getElementById("display");
+    let currentInput = "";
+
+    function appendNumber(number) {
+      currentInput += number;
+      display.value = currentInput;
+    }
+
+    function appendOperator(operator) {
+      currentInput += operator;
+      display.value = currentInput;
+    }
+
+    function clearDisplay() {
+      currentInput = "";
+      display.value = "";
+    }
+
+    function calculate() {
+      try {
+        currentInput = eval(currentInput).toString();
+        display.value = currentInput;
+      } catch (e) {
+        display.value = "Error";
+        currentInput = "";
+      }
+    }
+  </script>
+</body>
+</html>
